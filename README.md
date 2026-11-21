@@ -1,5 +1,6 @@
 # reset-navicat-premium
 **关键词: Navicat, MacOS, Windows, 破解版, 试用期重置**
+
 Navicat Premium 无限重置试用期（macOS / Windows）：macOS 提供可配置的一键脚本，Windows 提供批处理与 Python 版本，支持自定义安装路径，支持 Navicat Premium 18。
 
 
