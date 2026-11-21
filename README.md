@@ -1,6 +1,6 @@
-# reset-navicat-premium · 本地实现
+# reset-navicat-premium
 
-无限重置试用 Navicat Premium 所有版本，支持 Windows 和 Mac！亲测 Win10 没啥问题！
+跨平台重置 Navicat Premium 试用期的工具集：macOS 提供可配置的一键脚本，Windows 提供批处理与 Python 方案。
 
 推荐使用 `reset_for_windows.bat`！
 
@@ -8,44 +8,40 @@
 
 - 原始项目地址：[malaohu/reset-navicat-premium](https://github.com/malaohu/reset-navicat-premium)
 
-## 本机实现
-
-本项目已在本机（Mac）实现并验证，整理目录：
+## 项目结构
 
 ```
-/Volumes/DATA/repos/reset-navicat-premium/
+reset-navicat-premium/
 ├── README.md
-├── reset.sh              # macOS 可执行重置入口（本机适配版）
+├── reset.sh              # macOS 可执行重置入口
 ├── navi-reset.conf       # 路径配置文件
-├── reset_for_mac.sh      # macOS 重置脚本（本机已适配）
+├── reset_for_mac.sh      # macOS 重置脚本
 ├── reset.py              # Windows 重置脚本（Python 版）
 └── reset_for_windows.bat # Windows 重置脚本（推荐）
 ```
 
 ## 作出的变更与适配
 
-相对于原项目（`malaohu/reset-navicat-premium`），本机实现中做了以下变更：
+相对于原项目，本版本做了以下调整：
 
-1. **部署路径适配（macOS）**
-   - 原脚本假设 Navicat 安装在 `/Applications/Navicat Premium.app`
-   - 本机实际安装在 `/Volumes/DATA/Applications/Navicat Premium.app`
-   - 新增 `reset.sh` 自动探测：`/Applications/Navicat Premium.app` → 不存在则改用 `/Volumes/DATA/Applications/Navicat Premium.app`
+1. **部署路径可配置**
+   - 应用路径不再写死：默认 `/Applications/Navicat Premium.app`；如果安装位置不同，修改 `navi-reset.conf` 中的 `NAVICAT_APP_PATH` 即可
+   - `reset.sh` 会优先使用配置中的路径，找不到时回退到默认路径
 
-2. **版本适配（macOS）**
-   - 原脚本仅支持 Navicat Premium 15/16/17
-   - 本机安装版本为 **Navicat Premium 18.0.5**
-   - `reset.sh` 已增加 `18` 版本分支；keychain 清理逻辑覆盖 17/18
+2. **版本自动识别**
+   - 启动时读取应用 `Info.plist` 的 `CFBundleShortVersionString`，按主版本号分支处理
+   - 已覆盖较新版本（16/17/18）的 plist 与 Keychain 清理逻辑
 
 3. **Bug 修复**
-   - keychain 清理管道 `grep ... || true`：原脚本 `set -e` + grep 无匹配时退出码为 1，导致脚本被中断未输出 `Done`
+   - Keychain 清理管道在无匹配项时会让 `set -e` 中断脚本；已改为容错处理，保证流程完整输出 `Done`
 
 4. **工程化**
-   - 新增可执行入口 `reset.sh`（内部 `source` 同目录 `navi-reset.conf`）
-   - 新增 `navi-reset.conf`，集中管理路径配置
+   - 新增入口脚本 `reset.sh`，通过 `source` 加载同目录的 `navi-reset.conf`
+   - 路径、服务名、Keychain 等参数集中在 `navi-reset.conf`，便于他人按自己的环境修改
 
 ## 具体配置指南
 
-`reset.sh` 通过 `navi-reset.conf` 读取路径配置，支持环境变量覆盖：
+所有可配置项集中在 `navi-reset.conf`，每一项都支持用环境变量覆盖（环境变量优先于文件内的默认值）：
 
 | 配置项 | 说明 | 默认值 |
 |---|---|---|
@@ -56,28 +52,36 @@
 | `NAVICAT_KEYCHAIN` | Keychain 数据库 | `$HOME/Library/Keychains/login.keychain-db` |
 | `NAVICAT_KEYCHAIN_SERVICE` | Keychain 服务名 | 同 `NAVICAT_SERVICE` |
 
-环境变量覆盖示例：
+修改方式有两种，任选其一：
+
+**方式一：直接编辑 `navi-reset.conf`**
 
 ```bash
-NAVICAT_APP_PATH="/Applications/Navicat Premium.app" \
-NAVICAT_SERVICE="com.navicat.NavicatPremium" \
-NAVICAT_PREFERENCES="$HOME/Library/Preferences/com.navicat.NavicatPremium.plist" \
-NAVICAT_DATA_DIR="$HOME/Library/Application Support/PremiumSoft CyberTech/Navicat CC/Navicat Premium" \
-./reset.sh
+NAVICAT_APP_PATH="/你的安装路径/Navicat Premium.app"
+NAVICAT_SERVICE="com.navicat.NavicatPremium"
+# 其余保持默认即可
 ```
+
+**方式二：运行时用环境变量覆盖（不修改文件）**
+
+```bash
+NAVICAT_APP_PATH="/你的安装路径/Navicat Premium.app" ./reset.sh
+```
+
+> 配置项均采用 `${变量:-默认值}` 写法：没设置时使用默认值，设置了就以设置为准。
 
 ## 如何运行
 
-macOS（本机已适配 Navicat 18）：
+macOS：
 
 ```bash
-cd /Volumes/DATA/repos/reset-navicat-premium
+cd reset-navicat-premium
 ./reset.sh
 ```
 
-- 脚本会自动检测 Navicat Premium 版本
-- 检测到运行中的 Navicat 时会提示先保存工作，随后自动关闭
-- 执行完成后输出 `Done`
+- 脚本自动读取 Navicat Premium 版本
+- 若检测到 Navicat 正在运行，会提示先保存工作，随后自动关闭
+- 执行完成输出 `Done`
 
 Windows：
 
