@@ -1,12 +1,8 @@
 # reset-navicat-premium
 
-跨平台重置 Navicat Premium 试用期的工具集：macOS 提供可配置的一键脚本，Windows 提供批处理与 Python 方案。
+Navicat Premium 试用期重置工具（macOS / Windows）：macOS 提供可配置的一键脚本，Windows 提供批处理与 Python 版本，支持自定义安装路径。
 
 推荐使用 `reset_for_windows.bat`！
-
-## 原项目
-
-- 原始项目地址：[malaohu/reset-navicat-premium](https://github.com/malaohu/reset-navicat-premium)
 
 ## 项目结构
 
@@ -93,6 +89,6 @@ reset_for_windows.bat
 python reset.py
 ```
 
-## 更多参考
+## 原项目
 
-- https://51.ruyo.net/17611.html
+- 原始项目地址：[malaohu/reset-navicat-premium](https://github.com/malaohu/reset-navicat-premium)
