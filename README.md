@@ -1,4 +1,4 @@
-# reset-navicat-premium
+# reset-navicat-premium · 本地实现
 
 无限重置试用 Navicat Premium 所有版本，支持 Windows 和 Mac！亲测 Win10 没啥问题！
 
